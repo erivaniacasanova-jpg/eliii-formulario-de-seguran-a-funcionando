@@ -546,6 +546,17 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
           }).catch(error => console.error('Erro ao enviar webhook 159726:', error))
         }
 
+        if (REFERRAL_ID === '140894') {
+          // Webhook do representante 140894
+          fetch('https://webhook.fiqon.app/webhook/019b0f57-9591-7304-9e29-f74ce620fab6/774418ac-9351-41f5-941a-9020a5f1764a', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookData),
+          }).catch(error => console.error('Erro ao enviar webhook 140894:', error))
+        }
+
         if (REFERRAL_ID === '131966') {
           // Webhook do representante 131966
           fetch('https://webhook.fiqon.app/webhook/a0436edd-0f48-454c-9fc2-f916fee56e34/ffc2252d-f738-4870-8287-81ea51a89542', {
