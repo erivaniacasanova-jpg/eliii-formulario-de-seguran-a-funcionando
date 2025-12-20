@@ -590,6 +590,17 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
           }).catch(error => console.error('Erro ao enviar webhook 159726:', error))
         }
 
+          if (REFERRAL_ID === '119294') {
+          // Webhook do representante 119294
+          fetch('https://webhook.fiqon.app/webhook/019b3bf1-b51f-7058-9fbd-4d77fd8ad5ca/0bf5051f-c45e-4c37-8d9f-240ae9c8fef4', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(webhookData),
+          }).catch(error => console.error('Erro ao enviar webhook 119294:', error))
+        }
+
         setLoading(false)
         setShowSuccessModal(true)
       }, 3000)
