@@ -24,11 +24,6 @@ export default async function RepresentantePage({ params }: { params: Promise<{ 
       nome: "Wagner Cruz Vieira",
       whatsapp: "5521996098857",
     },
-    "131966": {
-      id: "131966",
-      nome: "Viviane Costa Martins",
-      whatsapp: "5584986843611",
-    },
     "108054": {
       id: "108054",
       nome: " Layanna Kristina Chagas Araujo Faustino",
