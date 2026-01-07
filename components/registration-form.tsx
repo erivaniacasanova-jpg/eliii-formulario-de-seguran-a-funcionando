@@ -276,6 +276,11 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
         break
       case "cep":
         isValid = value.replace(/\D/g, "").length === 8
+        // Quando o CEP for válido, liberar TODOS os campos de endereço de uma vez
+        if (isValid) {
+          setActiveField("complement")
+          return
+        }
         break
       case "district":
       case "city":
@@ -296,6 +301,16 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
 
     if (isValid && currentIndex < fieldOrder.length - 1) {
       setActiveField(fieldOrder[currentIndex + 1])
+    }
+
+    // Verificar se todos os campos de endereço obrigatórios estão preenchidos para liberar typeFrete
+    if (["district", "city", "state", "street"].includes(field)) {
+      if (formData.district.trim().length > 0 &&
+          formData.city.trim().length > 0 &&
+          formData.state !== "" &&
+          formData.street.trim().length > 0) {
+        setActiveField("typeFrete")
+      }
     }
   }
 
@@ -786,6 +801,23 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
     video.src = 'https://myehbxfidszreorsaexi.supabase.co/storage/v1/object/public/adesao/adesao.mp4'
     video.load()
   }, [])
+
+  // Monitorar campos de endereço e liberar typeFrete quando todos estiverem preenchidos
+  useEffect(() => {
+    if (activeField === "complement" ||
+        (formData.district.trim().length > 0 &&
+         formData.city.trim().length > 0 &&
+         formData.state !== "" &&
+         formData.street.trim().length > 0)) {
+      if (formData.district.trim().length > 0 &&
+          formData.city.trim().length > 0 &&
+          formData.state !== "" &&
+          formData.street.trim().length > 0 &&
+          activeField !== "typeFrete") {
+        setActiveField("typeFrete")
+      }
+    }
+  }, [formData.district, formData.city, formData.state, formData.street, activeField])
 
   if (showSuccessModal) {
     return (
