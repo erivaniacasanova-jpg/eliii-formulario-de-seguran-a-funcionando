@@ -412,17 +412,23 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
       const data = await response.json()
 
       if (data.data && data.data.id) {
-        // Auto-fill name and mark fields as validated
+        const autoFilledName = data.data.nome_da_pf || ""
         setFormData((prev) => ({
           ...prev,
-          name: data.data.nome_da_pf || prev.name,
+          name: autoFilledName,
         }))
         setCpfValidated(true)
+
+        if (autoFilledName.trim().length > 3) {
+          setActiveField("email")
+        }
+
         toast({
           title: "CPF validado!",
           description: "Dados preenchidos automaticamente.",
         })
       } else {
+        setActiveField("name")
         toast({
           title: "CPF não encontrado",
           description: "Verifique o CPF e data de nascimento.",
@@ -431,6 +437,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
       }
     } catch (error) {
       console.error("Erro ao validar CPF:", error)
+      setActiveField("name")
     }
   }
 
