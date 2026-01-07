@@ -194,7 +194,6 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
   const validateWhatsApp = async (phone: string) => {
     const numbers = phone.replace(/\D/g, "")
 
-    // Validar se tem DDD (2 dígitos) + Número (8 ou 9 dígitos)
     if (numbers.length < 10 || numbers.length > 11) {
       setWhatsappValid(false)
       return
@@ -203,24 +202,41 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
     setWhatsappValidating(true)
 
     try {
-      // Formato: 55 + DDD + NÚMERO
       const waNumber = `55${numbers}`
 
-      // Tentar acessar o link do WhatsApp
-      const response = await fetch(`https://wa.me/${waNumber}`, {
-        method: 'HEAD',
-        mode: 'no-cors'
+      const response = await fetch('https://webhook.fiqon.app/webhook/019b97c2-6aed-7162-8a3a-1fd63694ecd6/5fb591d0-1499-4928-9b9f-198abec46afe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat: {
+            phone: waNumber
+          }
+        })
       })
 
-      // Como é no-cors, sempre retorna sucesso, então vamos usar uma abordagem diferente
-      // Vamos verificar se o número tem formato válido e assumir que está correto
-      setWhatsappValid(true)
-      checkFieldCompletion("cell", phone)
+      const data = await response.json()
 
+      if (data.existe === true) {
+        setWhatsappValid(true)
+        checkFieldCompletion("cell", phone)
+      } else {
+        setWhatsappValid(false)
+        toast({
+          title: "WhatsApp inválido",
+          description: "O número informado não possui WhatsApp. Por favor, verifique.",
+          variant: "destructive",
+        })
+      }
     } catch (error) {
-      // Se houver erro, ainda assim consideramos válido se o formato estiver correto
-      setWhatsappValid(true)
-      checkFieldCompletion("cell", phone)
+      console.error('Erro ao validar WhatsApp:', error)
+      setWhatsappValid(false)
+      toast({
+        title: "Erro na validação",
+        description: "Não foi possível validar o WhatsApp. Tente novamente.",
+        variant: "destructive",
+      })
     } finally {
       setWhatsappValidating(false)
     }
