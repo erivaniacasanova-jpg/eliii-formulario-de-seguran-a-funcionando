@@ -79,6 +79,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
   const [showPaymentModal, setShowPaymentModal] = useState(false)
   const [showErrorModal, setShowErrorModal] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
+  const [successMessage, setSuccessMessage] = useState("")
   const [billingId, setBillingId] = useState<string>("")
   const [orderAmount, setOrderAmount] = useState<number>(0)
   const [cpfValidated, setCpfValidated] = useState(false)
@@ -614,16 +615,23 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
 
       const responseData = await response.json()
 
+      // Capturar a mensagem retornada pelo FiQOn
+      const webhookMessage = responseData.message || ''
+
+      console.log('[FiQOn] Resposta do webhook:', responseData)
+      console.log('[FiQOn] Mensagem capturada:', webhookMessage)
+
       // Verificar se a resposta indica sucesso ou erro
       if (!response.ok || (responseData.success === false) || (responseData.error)) {
-        const errorMsg = responseData.message || responseData.error || 'Erro ao processar cadastro'
+        const errorMsg = webhookMessage || responseData.error || 'Erro ao processar cadastro'
         setErrorMessage(errorMsg)
         setShowErrorModal(true)
         setLoading(false)
         return
       }
 
-      // Se sucesso, mostrar modal de pagamento
+      // Se sucesso, capturar mensagem e mostrar modal de sucesso
+      setSuccessMessage(webhookMessage || 'Cadastro realizado com sucesso!')
       setLoading(false)
       setShowSuccessModal(true)
 
@@ -675,6 +683,14 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
           <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-4 text-center">
             Parabéns! Seu cadastro foi realizado com sucesso. 🎉
           </h1>
+
+          {successMessage && (
+            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-800 font-semibold text-center text-sm md:text-base">
+                {successMessage}
+              </p>
+            </div>
+          )}
 
           <div className="space-y-3 text-gray-700 text-sm md:text-base leading-relaxed">
             <p>
