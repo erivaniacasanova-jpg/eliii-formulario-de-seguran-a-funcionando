@@ -100,7 +100,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
     street: "",
     number: "",
     complement: "",
-    typeChip: "fisico",
+    typeChip: "",
     coupon: "",
     plan_id: "",
     typeFrete: "",
