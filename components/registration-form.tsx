@@ -613,25 +613,65 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
         body: JSON.stringify(webhookData),
       })
 
-      const responseData = await response.json()
+      console.log('[FiQOn] HTTP Status:', response.status)
+      console.log('[FiQOn] Response OK:', response.ok)
 
-      // Capturar a mensagem retornada pelo FiQOn
-      const webhookMessage = responseData.message || ''
-
-      console.log('[FiQOn] Resposta do webhook:', responseData)
-      console.log('[FiQOn] Mensagem capturada:', webhookMessage)
-
-      // Verificar se a resposta indica sucesso ou erro
-      if (!response.ok || (responseData.success === false) || (responseData.error)) {
-        const errorMsg = webhookMessage || responseData.error || 'Erro ao processar cadastro'
-        setErrorMessage(errorMsg)
+      // Tentar fazer parse da resposta
+      let responseData = {}
+      try {
+        const responseText = await response.text()
+        console.log('[FiQOn] Resposta bruta:', responseText)
+        responseData = JSON.parse(responseText)
+      } catch (parseError) {
+        console.error('[FiQOn] Erro ao fazer parse JSON:', parseError)
+        setErrorMessage('Resposta inválida do servidor.')
         setShowErrorModal(true)
         setLoading(false)
         return
       }
 
-      // Se sucesso, capturar mensagem e mostrar modal de sucesso
-      setSuccessMessage(webhookMessage || 'Cadastro realizado com sucesso!')
+      console.log('[FiQOn] Resposta parseada:', responseData)
+
+      // Capturar a mensagem retornada pelo FiQOn
+      const webhookMessage = responseData.message || responseData.msg || ''
+
+      console.log('[FiQOn] Mensagem capturada:', webhookMessage)
+
+      // Se temos uma mensagem, considerar como resposta válida do webhook
+      // O webhook retorna 200 com a mensagem, independente se é sucesso ou erro
+      if (webhookMessage) {
+        // Verificar se é erro (geralmente contém palavras-chave de erro)
+        const lowerMessage = webhookMessage.toLowerCase()
+        const isError = lowerMessage.includes('erro') ||
+                       lowerMessage.includes('já') ||
+                       lowerMessage.includes('inválido') ||
+                       lowerMessage.includes('falha') ||
+                       !response.ok
+
+        if (isError) {
+          setErrorMessage(webhookMessage)
+          setShowErrorModal(true)
+          setLoading(false)
+          return
+        }
+
+        // Se sucesso, capturar mensagem e mostrar modal de sucesso
+        setSuccessMessage(webhookMessage)
+        setLoading(false)
+        setShowSuccessModal(true)
+        return
+      }
+
+      // Se não houver mensagem e não for ok, erro
+      if (!response.ok) {
+        setErrorMessage('Erro ao processar cadastro. Tente novamente.')
+        setShowErrorModal(true)
+        setLoading(false)
+        return
+      }
+
+      // Se sucesso sem mensagem específica
+      setSuccessMessage('Cadastro realizado com sucesso!')
       setLoading(false)
       setShowSuccessModal(true)
 
