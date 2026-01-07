@@ -262,7 +262,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
         isValid = value.replace(/\D/g, "").length === 11
         break
       case "birth":
-        isValid = value.replace(/\D/g, "").length === 8 && birthValid === true
+        isValid = value.replace(/\D/g, "").length === 8
         break
       case "name":
         isValid = value.trim().length > 3
