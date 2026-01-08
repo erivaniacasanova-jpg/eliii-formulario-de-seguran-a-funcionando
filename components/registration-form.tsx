@@ -748,14 +748,6 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
             Parabéns! Seu cadastro foi realizado com sucesso. 🎉
           </h1>
 
-          {successMessage && (
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-green-800 font-semibold text-center text-sm md:text-base">
-                {successMessage}
-              </p>
-            </div>
-          )}
-
           <div className="space-y-3 text-gray-700 text-sm md:text-base leading-relaxed">
             <p>
               Para darmos continuidade com à ativação do seu plano, é necessário realizar o pagamento da sua taxa associativa, no valor proporcional ao plano escolhido por você.
