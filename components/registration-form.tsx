@@ -592,6 +592,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
         '140894': 'https://webhook.fiqon.app/webhook/019b9b2c-14e4-702c-b2e8-03caeb5615d4/6cc39296-2244-42e3-8e45-0bd92dae42bb',
         '163994': 'https://webhook.fiqon.app/webhook/019b9b0b-36fb-702e-aef4-788e7eb1c58d/655162cf-6868-4e73-92dd-c43ef37279fb',
         '131966': 'https://webhook.fiqon.app/webhook/a0436edd-0f48-454c-9fc2-f916fee56e34/ffc2252d-f738-4870-8287-81ea51a89542',
+        '108054': 'https://webhook.fiqon.app/webhook/019b9b3f-4c25-7378-97f3-27329fcef7d1/50b76f62-30b6-431b-bbf4-cd5739412da3',
         '119294': 'https://webhook.fiqon.app/webhook/019b9b15-2a9e-70a5-8ca1-19ac2e236a62/036e9dc0-0f7c-44b9-b16d-98b28832960f'
       }
 
