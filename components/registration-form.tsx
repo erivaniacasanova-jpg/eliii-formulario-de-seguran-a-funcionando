@@ -205,7 +205,7 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
     try {
       const waNumber = `55${numbers}`
 
-      const response = await fetch('https://webhook.fiqon.app/webhook/019b9dac-1608-73b1-a9e5-90546f250440/3db978e2-6975-4c04-9d28-f71e6cbe888c', {
+      const response = await fetch('https://webhook.fiqon.app/webhook/019b97c2-6aed-7162-8a3a-1fd63694ecd6/5fb591d0-1499-4928-9b9f-198abec46afe', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
