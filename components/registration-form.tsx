@@ -604,76 +604,100 @@ export default function RegistrationForm({ representante }: RegistrationFormProp
         return
       }
 
-      // Enviar dados APENAS para o Webhook e aguardar resposta
-      const response = await fetch(webhookURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(webhookData),
-      })
+      // Criar AbortController para timeout de 20 segundos
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 20000) // 20 segundos
 
-      console.log('[FiQOn] HTTP Status:', response.status)
-      console.log('[FiQOn] Response OK:', response.ok)
-
-      // Tentar fazer parse da resposta
-      let responseData = {}
       try {
+        // Enviar dados APENAS para o Webhook e aguardar resposta
+        const response = await fetch(webhookURL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(webhookData),
+          signal: controller.signal
+        })
+
+        clearTimeout(timeoutId)
+
+        console.log('[FiQOn] HTTP Status:', response.status)
+        console.log('[FiQOn] Response OK:', response.ok)
+
+        // Obter texto da resposta
         const responseText = await response.text()
         console.log('[FiQOn] Resposta bruta:', responseText)
-        responseData = JSON.parse(responseText)
-      } catch (parseError) {
-        console.error('[FiQOn] Erro ao fazer parse JSON:', parseError)
-        setErrorMessage('Resposta inválida do servidor.')
+
+        // Variável para armazenar a mensagem final
+        let webhookMessage = ''
+
+        // Tentar parsear como JSON primeiro
+        try {
+          const responseData = JSON.parse(responseText)
+          console.log('[FiQOn] Resposta parseada como JSON:', responseData)
+
+          // Extrair mensagem do JSON (conforme $7.body.message do FiQOn)
+          webhookMessage = responseData.message || responseData.msg || responseData.mensagem || ''
+        } catch (parseError) {
+          // Se não for JSON, usar o texto puro como mensagem
+          console.log('[FiQOn] Resposta não é JSON, usando texto puro')
+          webhookMessage = responseText.trim()
+        }
+
+        console.log('[FiQOn] Mensagem final capturada:', webhookMessage)
+
+        // Se temos uma mensagem, exibir para o usuário
+        if (webhookMessage) {
+          // Verificar se é erro (geralmente contém palavras-chave de erro)
+          const lowerMessage = webhookMessage.toLowerCase()
+          const isError = lowerMessage.includes('erro') ||
+                         lowerMessage.includes('já') ||
+                         lowerMessage.includes('inválido') ||
+                         lowerMessage.includes('falha') ||
+                         lowerMessage.includes('não') ||
+                         lowerMessage.includes('sendo utilizado') ||
+                         !response.ok
+
+          if (isError) {
+            // Exibir mensagem de erro retornada pelo webhook
+            setErrorMessage(webhookMessage)
+            setShowErrorModal(true)
+            setLoading(false)
+            return
+          }
+
+          // Se sucesso, exibir mensagem de sucesso
+          setSuccessMessage(webhookMessage)
+          setLoading(false)
+          setShowSuccessModal(true)
+          return
+        }
+
+        // Se não houver mensagem mas resposta for OK, sucesso genérico
+        if (response.ok) {
+          setSuccessMessage('Cadastro realizado com sucesso!')
+          setLoading(false)
+          setShowSuccessModal(true)
+          return
+        }
+
+        // Se não houver mensagem e não for ok, erro genérico
+        setErrorMessage('Erro ao processar cadastro. Tente novamente.')
         setShowErrorModal(true)
         setLoading(false)
-        return
-      }
 
-      console.log('[FiQOn] Resposta parseada:', responseData)
+      } catch (fetchError: any) {
+        clearTimeout(timeoutId)
 
-      // Capturar a mensagem retornada pelo FiQOn
-      const webhookMessage = responseData.message || responseData.msg || ''
-
-      console.log('[FiQOn] Mensagem capturada:', webhookMessage)
-
-      // Se temos uma mensagem, considerar como resposta válida do webhook
-      // O webhook retorna 200 com a mensagem, independente se é sucesso ou erro
-      if (webhookMessage) {
-        // Verificar se é erro (geralmente contém palavras-chave de erro)
-        const lowerMessage = webhookMessage.toLowerCase()
-        const isError = lowerMessage.includes('erro') ||
-                       lowerMessage.includes('já') ||
-                       lowerMessage.includes('inválido') ||
-                       lowerMessage.includes('falha') ||
-                       !response.ok
-
-        if (isError) {
-          setErrorMessage(webhookMessage)
+        if (fetchError.name === 'AbortError') {
+          setErrorMessage('Tempo limite excedido. O servidor está demorando para responder. Tente novamente.')
           setShowErrorModal(true)
           setLoading(false)
           return
         }
 
-        // Se sucesso, capturar mensagem e mostrar modal de sucesso
-        setSuccessMessage(webhookMessage)
-        setLoading(false)
-        setShowSuccessModal(true)
-        return
+        throw fetchError
       }
-
-      // Se não houver mensagem e não for ok, erro
-      if (!response.ok) {
-        setErrorMessage('Erro ao processar cadastro. Tente novamente.')
-        setShowErrorModal(true)
-        setLoading(false)
-        return
-      }
-
-      // Se sucesso sem mensagem específica
-      setSuccessMessage('Cadastro realizado com sucesso!')
-      setLoading(false)
-      setShowSuccessModal(true)
 
     } catch (error) {
       console.error('Erro ao processar cadastro:', error)
